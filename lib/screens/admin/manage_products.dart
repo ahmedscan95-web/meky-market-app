@@ -1,0 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class ManageProducts extends StatelessWidget {
+  const ManageProducts({super.key});
+  @override
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('إدارة المنتجات')), floatingActionButton: FloatingActionButton(onPressed: () => _add(context), child: const Icon(Icons.add)), body: StreamBuilder<QuerySnapshot>(stream: FirebaseFirestore.instance.collection('products').snapshots(), builder: (_, s) { if (!s.hasData) return const Center(child: CircularProgressIndicator()); return ListView(children: s.data!.docs.map((d) { final x = d.data() as Map<String, dynamic>; return ListTile(title: Text(x['name'] ?? ''), subtitle: Text('${x['price'] ?? 0} ج.م'), trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => d.reference.delete())); }).toList()); });
+  Future<void> _add(BuildContext context) async { final n = TextEditingController(); final p = TextEditingController(); await showDialog(context: context, builder: (_) => AlertDialog(title: const Text('إضافة منتج'), content: Column(mainAxisSize: MainAxisSize.min, children: [TextField(controller: n, decoration: const InputDecoration(labelText: 'اسم المنتج')), TextField(controller: p, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'السعر'))]), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')), ElevatedButton(onPressed: () async { await FirebaseFirestore.instance.collection('products').add({'name': n.text.trim(), 'price': double.tryParse(p.text) ?? 0, 'discount': 0, 'final_price': double.tryParse(p.text) ?? 0, 'quantity': 0, 'active': true, 'created_at': FieldValue.serverTimestamp()}); if (context.mounted) Navigator.pop(context); }, child: const Text('حفظ'))])); }
+}

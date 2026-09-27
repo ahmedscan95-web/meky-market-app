@@ -1,0 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+class SendRequestScreen extends StatefulWidget { const SendRequestScreen({super.key}); @override State<SendRequestScreen> createState() => _SendRequestScreenState(); }
+class _SendRequestScreenState extends State<SendRequestScreen> { final c = TextEditingController(); bool loading = false; Future<void> send() async { if (c.text.trim().isEmpty) return; setState(() => loading = true); await FirebaseFirestore.instance.collection('requests').add({'message': c.text.trim(), 'type': 'inquiry', 'status': 'pending', 'uid': FirebaseAuth.instance.currentUser?.uid, 'user_name': FirebaseAuth.instance.currentUser?.displayName ?? 'مستخدم', 'created_at': FieldValue.serverTimestamp()}); c.clear(); if (mounted) { setState(() => loading = false); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إرسال الطلب'))); } } @override Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('إرسال طلب')), body: Padding(padding: const EdgeInsets.all(20), child: Column(children: [TextField(controller: c, maxLines: 5, decoration: const InputDecoration(labelText: 'اكتب رسالتك')), const SizedBox(height: 16), ElevatedButton(onPressed: loading ? null : send, child: const Text('إرسال'))]))); }
