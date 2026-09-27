@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "483238695077",
+    "project_id": "meky-market",
+    "storage_bucket": "meky-market.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483238695077:android:c55319355e747986da7d4c",
+        "android_client_info": {
+          "package_name": "com.meky.market"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-DTZNR2xgFVzpOJ26n-fUw84pTj45pMY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
