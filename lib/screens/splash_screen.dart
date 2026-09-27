@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'login_screen.dart';
-import 'customer/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
 import 'admin/admin_dashboard.dart';
+import 'customer/home_screen.dart';
+import 'employee/employee_dashboard.dart';
+import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,25 +25,36 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     final user = FirebaseAuth.instance.currentUser;
     if (!mounted) return;
-    
+
     if (user == null) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      _replace(const LoginScreen());
       return;
     }
-    
+
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final role = snapshot.data()?['role'] as String? ?? 'customer';
       if (!mounted) return;
-      
-      final role = doc.data()?['role'] ?? 'customer';
-      if (role == 'admin' || user.email == 'meky@market.com') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AdminDashboard()));
-      } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CustomerHomeScreen()));
-      }
-    } catch (e) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CustomerHomeScreen()));
+      _replace(_screenForRole(role));
+    } catch (_) {
+      if (mounted) _replace(const CustomerHomeScreen());
     }
+  }
+
+  Widget _screenForRole(String role) => switch (role) {
+        'admin' => const AdminDashboard(),
+        'employee' => const EmployeeDashboard(),
+        _ => const CustomerHomeScreen(),
+      };
+
+  void _replace(Widget screen) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => screen),
+    );
   }
 
   @override
@@ -51,7 +64,11 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text('🛒', style: TextStyle(fontSize: 72)),
             SizedBox(height: 16),
-            Text('ماركت ميكي', style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
+            Text('ماركت ميكي',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold)),
             SizedBox(height: 24),
             CircularProgressIndicator(color: Colors.white),
           ]),
